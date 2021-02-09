@@ -1,0 +1,42 @@
+version: '3'
+services:
+
+  #php app container
+  app:
+    build:
+      context: .
+      dockerfile: config/Dockerfile
+    image: christexe/php:7.4-fpm-alpine
+    container_name: php_app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www/html
+    volumes:
+      - ./code/:/var/www/html
+      - ./config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    networks:
+      - labnet
+
+  #Nginx Service
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8080:80"
+      - "9001:9001"
+    volumes:
+      - ./code/:/var/www/html
+      - ./config/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - labnet
+
+#Docker Networks
+networks:
+  labnet: 
+    external:
+      name: labnet
